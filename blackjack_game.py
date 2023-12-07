@@ -69,16 +69,19 @@ class Chip ():
     
     def lose(self):
         self.total -= self.bet
+        
+
   
   
                 
 def new_bet (chips):
-    try:
-        chips.bet = int(input("Cuál es tu apuesta? "))
-        if chips.bet > chips.total:
-            print (f"No hay pasta, te queda {chips.total}")
-    except:
-        print ("Escribe bien, coño!!!")
+    while chips.bet == 0 or chips.bet > chips.total:
+        try:
+            chips.bet = int(input("Cuál es tu apuesta? "))
+            if chips.bet > chips.total:
+                print (f"No hay pasta, te queda {chips.total}")
+        except:
+            print ("Escribe bien, coño!!!")
     return chips.bet
             
 class Game():
@@ -91,48 +94,116 @@ class Game():
     def check_continue(self):
         if self.player_hand.value > 21:
             print("Te has pasado. La máquina gana")
+            self.player_chip.lose()
+            print(f"Tu nuevo saldo es: {self.player_chip.total}")
+            self.new_deck = Deck()
+            self.new_deck.shuffle()
+            self.player_hand = Hand()
+            self.dealer_hand = Hand()
             return False
         elif self.dealer_hand.value == 21:
             print("La máquina gana")
+            self.player_chip.lose()
+            print(f"Tu nuevo saldo es: {self.player_chip.total}")    
+            self.new_deck = Deck()
+            self.new_deck.shuffle()
+            self.player_hand = Hand()
+            self.dealer_hand = Hand()        
             return False 
+        elif self.player_hand.value == 21:
+            print("Has ganado")
+            self.player_chip.win()
+            print(f"Tu nuevo saldo es: {self.player_chip.total}")  
+            self.new_deck = Deck()
+            self.new_deck.shuffle()
+            self.player_hand = Hand()
+            self.dealer_hand = Hand()                      
+            return False         
         elif self.dealer_hand.value > 21:
             print("Has ganado")
+            self.player_chip.win()
+            print(f"Tu nuevo saldo es: {self.player_chip.total}")  
+            self.new_deck = Deck()
+            self.new_deck.shuffle()
+            self.player_hand = Hand()
+            self.dealer_hand = Hand()                                 
             return False 
-        else: 
+        elif self.player_hand.value > self.dealer_hand.value >= 17:
+            print("Has ganado")
+            self.player_chip.win()
+            print(f"Tu nuevo saldo es: {self.player_chip.total}")  
+            self.new_deck = Deck()
+            self.new_deck.shuffle()
+            self.player_hand = Hand()
+            self.dealer_hand = Hand()                                 
+            return False 
+        elif self.dealer_hand.value > self.player_hand.value:
+            print("Has ganado")
+            self.player_chip.win()
+            print(f"Tu nuevo saldo es: {self.player_chip.total}")  
+            self.new_deck = Deck()
+            self.new_deck.shuffle()
+            self.player_hand = Hand()
+            self.dealer_hand = Hand()                                 
+            return False 
+        else:
             return True
         
+    
         
+        
+    def ask_new_card(self):
+        response = ""
+        while self.player_hand.value < 21 or response.upper() == "N":
+            response = input("Quieres una nueva carta? S/N ")
+            
+            if response.upper() == "S":
+                self.player_hand.add_card(self.new_deck.deal())
+                print(self.player_hand.value)
+                for cards in self.player_hand.card:
+                    print(cards)
+                print("\nDealer")
+                for cards in self.dealer_hand.card[1:]:
+                    print(cards)
+                print("\n")
+           
+                
+            elif response.upper() == "N":
+                while self.dealer_hand.value < 17:
+                    self.dealer_hand.add_card(self.new_deck.deal())
+                    print(self.player_hand.value)
+                    for cards in self.player_hand.card:
+                        print(cards)
+                    print("\nDealer")
+                    print(self.dealer_hand.value)
+                    for cards in self.dealer_hand.card:
+                        print(cards)
+                    print("\n")
+                    
+                    
+                
     def start_game(self):
         self.new_deck.shuffle()
         while True:
-            if self.check_continue() == True:
-                
-                new_bet(self.player_chip)
-                self.player_hand.add_card(self.new_deck.deal())
-                self.player_hand.add_card(self.new_deck.deal())
-                
-                self.dealer_hand.add_card(self.new_deck.deal())
-                self.dealer_hand.add_card(self.new_deck.deal())
-                
-                print(self.player_hand.value, self.player_hand.card[0],self.player_hand.card[1])
-                print(self.dealer_hand.card[0]) 
-                self.ask_new_card()
-                
-          
-    def ask_new_card(self):
-        response = ""
-        while self.player_hand.value < 21 or response == "N":
-            response = input("Nueva carta? S/N")
-            if response == "S":
-                self.player_hand.add_card(self.new_deck.deal())
-                print(self.player_hand.value, self.player_hand.card[0],self.player_hand.card[1], self.player_hand.card[2])
-                
-            else:
-                response = "N"
+            if self.player_chip.total <=0:
+                break
+            self.check_continue()
+            new_bet(self.player_chip)
+            self.player_hand.add_card(self.new_deck.deal())
+            self.player_hand.add_card(self.new_deck.deal())
             
+            self.dealer_hand.add_card(self.new_deck.deal())
+            self.dealer_hand.add_card(self.new_deck.deal())
             
-
-            
+            print("\nPlayer")
+            print(self.player_hand.value)
+            for cards in self.player_hand.card:
+                print(cards)
+            print("\nDealer")
+            for cards in self.dealer_hand.card[1:]:
+                print(cards)
+            print("\n")
+            self.ask_new_card()
             
             
 """-------Juego---------"""
